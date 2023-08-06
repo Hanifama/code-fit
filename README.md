@@ -34,6 +34,6 @@ start npm
 This will start the development server and the application will be accessible at http://localhost:3000/.
 
 Contact
-If you have any questions or suggestions regarding this project, please feel free to contact me at [your-email@example.com]. You can also contact me via my GitHub profile: your-github-username.
+If you have any questions or suggestions regarding this project, please feel free to contact me at hanifamafisial@gmail.com. You can also contact me via my GitHub profile: your-github-username.
 
 Happy coding!
