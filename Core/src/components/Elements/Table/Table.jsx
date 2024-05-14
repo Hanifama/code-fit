@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+// src/components/MembersTable.js
+import React, { useEffect, useState } from 'react';
 import {
   Card,
   CardHeader,
@@ -15,49 +16,69 @@ import {
   IconButton,
   Tooltip,
 } from "@material-tailwind/react";
-import { MagnifyingGlassIcon, PencilIcon, UserPlusIcon } from "@heroicons/react/24/outline";
-import { TABS, TABLE_HEAD, TABLE_ROWS } from '../../../utils/data';
+import { MagnifyingGlassIcon, PencilIcon, UserPlusIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { TABS, TABLE_HEAD } from '../../../utils/data';
+import { getMembers, deleteMember } from '../../../utils/api'; // Import deleteMember from API utils
 
 export function MembersTable() {
+    const [members, setMembers] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage] = useState(5);
-    const [selectedTab, setSelectedTab] = useState('all'); // State untuk menyimpan tab yang dipilih
+    const [selectedTab, setSelectedTab] = useState('all');
+    
+    useEffect(() => {
+        fetchMembers();
+    }, []);
 
-    // Fungsi untuk menangani perubahan tab
-    const handleTabChange = (value) => {
-        setSelectedTab(value); // Update selectedTab dengan nilai tab yang dipilih
-        console.log("Selected Tab:", value); // Cetak nilai tab yang dipilih ke konsol
+    const fetchMembers = async () => {
+        try {
+            const membersData = await getMembers();
+            setMembers(membersData);
+        } catch (error) {
+            console.error("Error fetching members:", error);
+        }
     };
 
-    // Fungsi untuk menyaring baris data berdasarkan tab yang dipilih dan kriteria pencarian
+    const handleTabChange = (value) => {
+        setSelectedTab(value);
+        setCurrentPage(1);
+    };
+
     const filterRows = () => {
-        return TABLE_ROWS.filter((row) => {
-            const fullName = `${row.name} ${row.email}`.toLowerCase();            
-            return fullName.includes(searchTerm.toLowerCase()) && (selectedTab === 'all' || row.job === selectedTab);
+        return members.filter((member) => {
+            const fullName = `${member.name} ${member.email}`.toLowerCase();
+            return fullName.includes(searchTerm.toLowerCase()) && (selectedTab === 'all' || member.job === selectedTab);
         });
     };
 
     const indexOfLastRow = currentPage * rowsPerPage;
     const indexOfFirstRow = indexOfLastRow - rowsPerPage;
     
-    // Membuat daftar baris yang akan ditampilkan pada halaman saat ini
     const currentRows = filterRows().slice(indexOfFirstRow, indexOfLastRow);
 
-    // Fungsi untuk menangani perubahan pencarian
     const handleSearch = (e) => {
         setSearchTerm(e.target.value);
-        setCurrentPage(1); // Kembali ke halaman pertama setelah pencarian diubah
+        setCurrentPage(1);
     };
 
-    // Fungsi untuk berpindah ke halaman sebelumnya
     const handlePreviousPage = () => {
         setCurrentPage(currentPage - 1);
     };
     
-    // Fungsi untuk berpindah ke halaman berikutnya
     const handleNextPage = () => {
         setCurrentPage(currentPage + 1);
+    };
+
+    // Fungsi untuk menghapus anggota
+    const handleDelete = async (id) => {
+        try {
+            await deleteMember(id); // Panggil fungsi deleteMember dari API
+            const updatedMembers = members.filter(member => member.id !== id); // Filter anggota yang tidak dihapus
+            setMembers(updatedMembers); // Perbarui state dengan anggota yang diperbarui
+        } catch (error) {
+            console.error('Error deleting member:', error);
+        }
     };
 
     return (
@@ -114,7 +135,7 @@ export function MembersTable() {
                                         variant="small"
                                         color="blue-gray"
                                         className="font-normal leading-none opacity-70"
-                                    >
+                                        >
                                         {head}
                                     </Typography>
                                 </th>
@@ -122,9 +143,8 @@ export function MembersTable() {
                         </tr>
                     </thead>
                     <tbody>
-                        {/* Render baris data yang sudah difilter */}
-                        {currentRows.map(({ img, name, email, job, org, online, date }) => (
-                            <tr key={name}>
+                        {currentRows.map(({ id, img, name, email, job, org, online, date }) => (
+                            <tr key={id}>
                                 <td className="p-4 border-b border-blue-gray-50">
                                     <div className="flex items-center gap-3">
                                         <Avatar src={img} alt={name} size="sm" />
@@ -169,6 +189,12 @@ export function MembersTable() {
                                             <PencilIcon className="h-4 w-4" />
                                         </IconButton>
                                     </Tooltip>
+                                    {/* Button untuk menghapus member */}
+                                    <Tooltip content="Delete User">
+                                        <IconButton variant="text" onClick={() => handleDelete(id)}>
+                                            <TrashIcon className="h-4 w-4"/>
+                                        </IconButton>
+                                    </Tooltip>
                                 </td>
                             </tr>
                         ))}
@@ -177,7 +203,7 @@ export function MembersTable() {
             </CardBody>
             <CardFooter className="flex items-center justify-between border-t border-blue-gray-50 p-4">
                 <Typography variant="small" color="blue-gray" className="font-normal">
-                    Page {currentPage} of {Math.ceil(filterRows().length / rowsPerPage)} {/* Menghitung jumlah halaman berdasarkan jumlah baris setelah difilter */}
+                    Page {currentPage} of {Math.ceil(filterRows().length / rowsPerPage)}
                 </Typography>
                 <div className="flex gap-2">
                     <Button

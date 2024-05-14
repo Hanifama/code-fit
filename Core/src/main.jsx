@@ -11,6 +11,7 @@ import ErrorPage from './Pages/errorpage.jsx'
 import Navbar from './components/Elements/Navbar/Index.jsx'
 import Header from './components/Elements/Header/Index.jsx'
 import { MembersTable } from './components/Elements/Table/Table.jsx';
+import MemberFormCreate from './components/Fragments/FormCreate.jsx';
 
 
 const router = createBrowserRouter([
@@ -30,7 +31,12 @@ const router = createBrowserRouter([
   {
     path : "/Table",
     element : <MembersTable/>
-  }
+  },
+  {
+    path : "/Create",
+    element : <MemberFormCreate/>
+  },
+
 ])
 
 ReactDOM.createRoot(document.getElementById('root')).render(
