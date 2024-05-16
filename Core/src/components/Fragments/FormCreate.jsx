@@ -1,26 +1,25 @@
-// src/components/MemberForm.js
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Input, Button, Typography, Alert } from "@material-tailwind/react";
-import axios from 'axios'; // Import axios
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
-const MemberFormCreate = ({ onSubmit, memberToEdit, clearEdit }) => {
+const MemberFormCreate = () => {
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
+        id: '',
         name: '',
         email: '',
         job: '',
         org: '',
-        online: false,
         date: '',
-        img: '' // Tambah properti img di dalam state
+        img: '',
+        online: false
     });
 
     const [error, setError] = useState('');
+    const [success, setSuccess] = useState(false);
+    const [shouldNavigate, setShouldNavigate] = useState(false);
 
-    useEffect(() => {
-        if (memberToEdit) {
-            setFormData(memberToEdit);
-        }
-    }, [memberToEdit]);
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -30,7 +29,6 @@ const MemberFormCreate = ({ onSubmit, memberToEdit, clearEdit }) => {
         });
     };
 
-    // Fungsi handleChange untuk input gambar
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         const reader = new FileReader();
@@ -38,7 +36,7 @@ const MemberFormCreate = ({ onSubmit, memberToEdit, clearEdit }) => {
         reader.onloadend = () => {
             setFormData({
                 ...formData,
-                img: reader.result // Simpan URL gambar ke dalam state
+                img: reader.result
             });
         };
 
@@ -50,51 +48,58 @@ const MemberFormCreate = ({ onSubmit, memberToEdit, clearEdit }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!formData.name || !formData.email || !formData.job || !formData.org || !formData.date || !formData.img) {
+        if (!formData.id || !formData.name || !formData.email || !formData.job || !formData.org || !formData.date || !formData.img) {
             setError('All fields are required.');
             return;
         }
 
         try {
-            // Kirim data ke fake API menggunakan axios
             const response = await axios.post('http://localhost:5000/members', formData);
             console.log('Data successfully submitted:', response.data);
-            onSubmit(formData);
-            setFormData({
-                name: '',
-                email: '',
-                job: '',
-                org: '',
-                online: false,
-                date: '',
-                img: '' // Reset nilai img setelah submit
-            });
-            setError('');
+
+            if (response.data.id) {
+                setSuccess(true);
+                setTimeout(() => {
+                    setShouldNavigate(true);
+                }, 3000);
+            } else {
+                console.error('Invalid server response:', response.data);
+                setError('Invalid server response.');
+            }
         } catch (error) {
-            console.error('Error submitting data:', error);
-            setError('An error occurred while submitting data. Please try again later.');
+            if (error.response && error.response.data) {
+                console.error('Error submitting data:', error.response.data);
+            } else {
+                console.error('Error submitting data:', error);
+            }
         }
     };
 
+    useEffect(() => {
+        if (shouldNavigate) {
+            navigate('/member');
+        }
+    }, [shouldNavigate, navigate]);
+
     return (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <Typography variant="h6" color="blue-gray">
-                {memberToEdit ? 'Edit Member' : 'Add Member'}
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 mx-auto max-w-lg mt-8">
+            <Typography variant="h6" color="blue-gray" className="text-center">
+                Add Member
             </Typography>
-            {error && <Alert color="error">{error}</Alert>}
-            <Input label="Name" name="name" value={formData.name} onChange={handleChange} required />
-            <Input label="Email" name="email" value={formData.email} onChange={handleChange} type="email" required />
-            <Input label="Job" name="job" value={formData.job} onChange={handleChange} required />
-            <Input label="Organization" name="org" value={formData.org} onChange={handleChange} required />
-            <label className="flex items-center gap-2">
-                <input type="checkbox" name="online" checked={formData.online} onChange={handleChange} />
-                Online
-            </label>
-            <Input label="Date" name="date" type="date" value={formData.date} onChange={handleChange} required />
-            <Input label="Image URL" name="img" type="file" accept="image/*" onChange={handleImageChange} required />
-            <Button type="submit">{memberToEdit ? 'Update' : 'Add'}</Button>
-            {memberToEdit && <Button type="button" onClick={clearEdit}>Cancel</Button>}
+            {error && <Alert color="red">{error}</Alert>}
+            {success && <Alert color="green">Data successfully submitted!</Alert>}
+            <div className="grid grid-cols-2 gap-4">
+                <Input label="ID" name="id" value={formData.id} onChange={handleChange} />
+                <Input label="Name" name="name" value={formData.name} onChange={handleChange} required />
+                <Input label="Email" name="email" value={formData.email} onChange={handleChange} type="email" required />
+                <Input label="Job" name="job" value={formData.job} onChange={handleChange} required />
+                <Input label="Organization" name="org" value={formData.org} onChange={handleChange} required />
+                <Input label="Date" name="date" type="date" value={formData.date} onChange={handleChange} required />
+                <Input label="Image URL" name="img" type="file" accept="image/*" onChange={handleImageChange} required />
+            </div>
+            <Button type="submit" className="mx-auto">Add</Button>
         </form>
+
     );
 };
 

@@ -1,32 +1,45 @@
-// src/components/MembersTable.js
 import React, { useEffect, useState } from 'react';
 import {
-  Card,
-  CardHeader,
-  Input,
-  Typography,
-  Button,
-  CardBody,
-  Chip,
-  CardFooter,
-  Tabs,
-  TabsHeader,
-  Tab,
-  Avatar,
-  IconButton,
-  Tooltip,
+    Card,
+    CardHeader,
+    Input,
+    Typography,
+    Button,
+    CardBody,
+    Chip,
+    CardFooter,
+    Tabs,
+    TabsHeader,
+    Tab,
+    Avatar,
+    IconButton,
+    Tooltip,
+    Dialog,
+    DialogHeader,
+    DialogBody,
+    DialogFooter,
+    Alert
 } from "@material-tailwind/react";
 import { MagnifyingGlassIcon, PencilIcon, UserPlusIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { useNavigate } from 'react-router-dom';
 import { TABS, TABLE_HEAD } from '../../../utils/data';
-import { getMembers, deleteMember } from '../../../utils/api'; // Import deleteMember from API utils
+import { getMembers, deleteMember, updateMember, uploadImage } from '../../../utils/api';
 
 export function MembersTable() {
+    const navigate = useNavigate();
     const [members, setMembers] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage] = useState(5);
     const [selectedTab, setSelectedTab] = useState('all');
-    
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [memberToDelete, setMemberToDelete] = useState(null);
+    const [memberToEdit, setMemberToEdit] = useState(null);
+    const [successMessage, setSuccessMessage] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
+    const [selectedFile, setSelectedFile] = useState(null);
+
     useEffect(() => {
         fetchMembers();
     }, []);
@@ -54,7 +67,7 @@ export function MembersTable() {
 
     const indexOfLastRow = currentPage * rowsPerPage;
     const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-    
+
     const currentRows = filterRows().slice(indexOfFirstRow, indexOfLastRow);
 
     const handleSearch = (e) => {
@@ -65,24 +78,79 @@ export function MembersTable() {
     const handlePreviousPage = () => {
         setCurrentPage(currentPage - 1);
     };
-    
+
     const handleNextPage = () => {
         setCurrentPage(currentPage + 1);
     };
 
-    // Fungsi untuk menghapus anggota
-    const handleDelete = async (id) => {
+    const handleDelete = async () => {
         try {
-            await deleteMember(id); // Panggil fungsi deleteMember dari API
-            const updatedMembers = members.filter(member => member.id !== id); // Filter anggota yang tidak dihapus
-            setMembers(updatedMembers); // Perbarui state dengan anggota yang diperbarui
+            await deleteMember(memberToDelete);
+            const updatedMembers = members.filter(member => member.id !== memberToDelete);
+            setMembers(updatedMembers);
+            setShowDeleteModal(false);
+            setMemberToDelete(null);
+            setSuccessMessage('Member deleted successfully!');
+            setErrorMessage('');
+            setTimeout(() => {
+                setSuccessMessage('');
+            }, 2000);
         } catch (error) {
             console.error('Error deleting member:', error);
+            setErrorMessage('Failed to delete member.');
+            setSuccessMessage('');
         }
+    };
+
+    const handleClickAdd = () => {
+        navigate('/create');
+    };
+
+    const handleEdit = (member) => {
+        setMemberToEdit(member);
+        setShowEditModal(true);
+    };
+
+    const handleEditSubmit = async () => {
+        try {
+            let updatedMember = { ...memberToEdit };
+            if (selectedFile) {
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+                const imageData = await uploadImage(formData);
+                updatedMember.img = imageData.url;
+            }
+            await updateMember(updatedMember.id, updatedMember);
+            fetchMembers();
+            setShowEditModal(false);
+            setMemberToEdit(null);
+            setSelectedFile(null);
+            setSuccessMessage('Member updated successfully!');
+            setErrorMessage('');
+            setTimeout(() => {
+                setSuccessMessage('');
+            }, 2000);
+        } catch (error) {
+            console.error('Error updating member:', error);
+            setErrorMessage('Failed to update member.');
+            setSuccessMessage('');
+        }
+    };
+
+
+    const handleEditChange = (e) => {
+        const { name, value } = e.target;
+        setMemberToEdit({ ...memberToEdit, [name]: value });
+    };
+
+    const handleFileChange = (e) => {
+        setSelectedFile(e.target.files[0]);
     };
 
     return (
         <Card className="h-full w-full">
+            {successMessage && <Alert color="green">{successMessage}</Alert>}
+            {errorMessage && <Alert color="red">{errorMessage}</Alert>}
             <CardHeader floated={false} shadow={false} className="rounded-none">
                 <div className="mb-8 flex items-center justify-between gap-8">
                     <div>
@@ -93,10 +161,11 @@ export function MembersTable() {
                             See information about all members
                         </Typography>
                     </div>
-                    <div className="flex shrink-0 flex-col gap-2 sm:flex-row">                       
-                        <Button 
-                            className="flex items-center gap-3" 
-                            size="sm"                
+                    <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
+                        <Button
+                            className="flex items-center gap-3"
+                            size="sm"
+                            onClick={handleClickAdd}
                         >
                             <UserPlusIcon strokeWidth={2} className="h-4 w-4" /> Add member
                         </Button>
@@ -104,7 +173,7 @@ export function MembersTable() {
                 </div>
                 <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
                     <Tabs value={selectedTab} className="w-full md:w-max">
-                        <TabsHeader>                        
+                        <TabsHeader>
                             {TABS.map(({ label, value }) => (
                                 <Tab key={value} value={value} onClick={() => handleTabChange(value)}>
                                     &nbsp;&nbsp;{label}&nbsp;&nbsp;
@@ -135,7 +204,7 @@ export function MembersTable() {
                                         variant="small"
                                         color="blue-gray"
                                         className="font-normal leading-none opacity-70"
-                                        >
+                                    >
                                         {head}
                                     </Typography>
                                 </th>
@@ -185,14 +254,13 @@ export function MembersTable() {
                                 </td>
                                 <td className="p-4 border-b border-blue-gray-50">
                                     <Tooltip content="Edit User">
-                                        <IconButton variant="text">
+                                        <IconButton variant="text" onClick={() => handleEdit({ id, img, name, email, job, org, online, date })}>
                                             <PencilIcon className="h-4 w-4" />
                                         </IconButton>
                                     </Tooltip>
-                                    {/* Button untuk menghapus member */}
                                     <Tooltip content="Delete User">
-                                        <IconButton variant="text" onClick={() => handleDelete(id)}>
-                                            <TrashIcon className="h-4 w-4"/>
+                                        <IconButton variant="text" onClick={() => { setShowDeleteModal(true); setMemberToDelete(id); }}>
+                                            <TrashIcon className="h-4 w-4" />
                                         </IconButton>
                                     </Tooltip>
                                 </td>
@@ -224,6 +292,101 @@ export function MembersTable() {
                     </Button>
                 </div>
             </CardFooter>
+            <Dialog open={showDeleteModal} handler={() => setShowDeleteModal(false)}>
+                <DialogHeader>Confirm Deletion</DialogHeader>
+                <DialogBody>
+                    Are you sure you want to delete this member?
+                </DialogBody>
+                <DialogFooter>
+                    <Button variant="text" color="red" onClick={() => setShowDeleteModal(false)}>
+                        Cancel
+                    </Button>
+                    <Button variant="gradient" color="green" onClick={handleDelete}>
+                        Confirm
+                    </Button>
+                </DialogFooter>
+            </Dialog>
+
+            <Dialog open={showEditModal} handler={() => setShowEditModal(false)}>
+                <DialogHeader>Edit Member</DialogHeader>
+                <DialogBody>
+                    <div className="mb-4">
+                        <Input
+                            label="Name"
+                            name="name"
+                            value={memberToEdit?.name || ''}
+                            onChange={handleEditChange}
+                        />
+                    </div>
+                    <div className="mb-4">
+                        <Input
+                            label="Email"
+                            name="email"
+                            value={memberToEdit?.email || ''}
+                            onChange={handleEditChange}
+                        />
+                    </div>
+                    <div className="mb-4">
+                        <Input
+                            label="Job"
+                            name="job"
+                            value={memberToEdit?.job || ''}
+                            onChange={handleEditChange}
+                        />
+                    </div>
+                    <div className="mb-4">
+                        <Input
+                            label="Organization"
+                            name="org"
+                            value={memberToEdit?.org || ''}
+                            onChange={handleEditChange}
+                        />
+                    </div>
+                    <div className="mt-4 mb-4">
+                        <Typography variant="small" color="blue-gray" className="mb-2">Online Status</Typography>
+                        <div className="flex gap-2">
+                            <label className="inline-flex items-center">
+                                <input
+                                    type="radio"
+                                    name="online"
+                                    value={true}
+                                    checked={memberToEdit?.online === true}
+                                    onChange={() => setMemberToEdit({ ...memberToEdit, online: true })}
+                                />
+                                <span className="ml-2">Online</span>
+                            </label>
+                            <label className="inline-flex items-center">
+                                <input
+                                    type="radio"
+                                    name="online"
+                                    value={false}
+                                    checked={memberToEdit?.online === false}
+                                    onChange={() => setMemberToEdit({ ...memberToEdit, online: false })}
+                                />
+                                <span className="ml-2">Offline</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div className="mt-4">
+                        <Typography variant="small" color="blue-gray" className="mb-2">Profile Image</Typography>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleFileChange}
+                        />
+                    </div>
+                </DialogBody>
+                <DialogFooter>
+                    <Button variant="text" color="red" onClick={() => setShowEditModal(false)}>
+                        Cancel
+                    </Button>
+                    <Button variant="gradient" color="green" onClick={handleEditSubmit}>
+                        Save
+                    </Button>
+                </DialogFooter>
+            </Dialog>
+
         </Card>
     );
 }
+

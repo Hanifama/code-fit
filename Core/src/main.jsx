@@ -29,11 +29,11 @@ const router = createBrowserRouter([
     element : <RegisterPage/>
   },
   {
-    path : "/Table",
+    path : "/member",
     element : <MembersTable/>
   },
   {
-    path : "/Create",
+    path : "/create",
     element : <MemberFormCreate/>
   },
 

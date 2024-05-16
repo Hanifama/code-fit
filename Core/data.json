@@ -1,7 +1,7 @@
 {
   "members": [
     {
-      "id": 1,
+      "id": "1",
       "img": "https://demos.creative-tim.com/test/corporate-ui-dashboard/assets/img/team-3.jpg",
       "name": "John Michael",
       "email": "john@creative-tim.com",
@@ -11,7 +11,7 @@
       "date": "23/04/18"
     },
     {
-      "id": 2,
+      "id": "2",
       "img": "https://demos.creative-tim.com/test/corporate-ui-dashboard/assets/img/team-2.jpg",
       "name": "Alexa Liras",
       "email": "alexa@creative-tim.com",
@@ -21,7 +21,7 @@
       "date": "23/04/18"
     },
     {
-      "id": 3,
+      "id": "3",
       "img": "https://demos.creative-tim.com/test/corporate-ui-dashboard/assets/img/team-1.jpg",
       "name": "Laurent Perrier",
       "email": "laurent@creative-tim.com",
@@ -31,7 +31,7 @@
       "date": "19/09/17"
     },
     {
-      "id": 4,
+      "id": "4",
       "img": "https://demos.creative-tim.com/test/corporate-ui-dashboard/assets/img/team-4.jpg",
       "name": "Michael Levi",
       "email": "michael@creative-tim.com",
@@ -41,7 +41,7 @@
       "date": "24/12/08"
     },
     {
-      "id": 5,
+      "id": "5",
       "img": "https://demos.creative-tim.com/test/corporate-ui-dashboard/assets/img/team-6.jpg",
       "name": "David Smith",
       "email": "david@creative-tim.com",
@@ -51,7 +51,7 @@
       "date": "10/05/24"
     },
     {
-      "id": 6,
+      "id": "6",
       "img": "https://randomuser.me/api/portraits/men/1.jpg",
       "name": "Daniel Brown",
       "email": "daniel@creative-tim.com",
@@ -61,7 +61,7 @@
       "date": "05/18/23"
     },
     {
-      "id": 7,
+      "id": "7",
       "img": "https://randomuser.me/api/portraits/women/2.jpg",
       "name": "Sophia Miller",
       "email": "sophia@creative-tim.com",
@@ -71,7 +71,7 @@
       "date": "09/21/22"
     },
     {
-      "id": 8,
+      "id": "8",
       "img": "https://randomuser.me/api/portraits/men/3.jpg",
       "name": "Matthew Wilson",
       "email": "matthew@creative-tim.com",
@@ -81,7 +81,7 @@
       "date": "11/30/20"
     },
     {
-      "id": 9,
+      "id": "9",
       "img": "https://randomuser.me/api/portraits/women/4.jpg",
       "name": "Emma Thompson",
       "email": "emma@creative-tim.com",
@@ -91,7 +91,7 @@
       "date": "07/12/21"
     },
     {
-      "id": 10,
+      "id": "10",
       "img": "https://randomuser.me/api/portraits/men/5.jpg",
       "name": "Ryan Garcia",
       "email": "ryan@creative-tim.com",
@@ -101,7 +101,7 @@
       "date": "03/05/24"
     },
     {
-      "id": 11,
+      "id": "11",
       "img": "https://randomuser.me/api/portraits/women/6.jpg",
       "name": "Olivia Evans",
       "email": "olivia@creative-tim.com",
@@ -111,14 +111,24 @@
       "date": "06/18/22"
     },
     {
-      "id": 12,
-      "img": "https://randomuser.me/api/portraits/men/7.jpg",
-      "name": "Noah Martinez",
-      "email": "noah@creative-tim.com",
-      "job": "Developer",
-      "org": "Tech",
+      "id": "12",
+      "img": "https://randomuser.me/api/portraits/men/8.jpg",
+      "name": "Ethan Hughes",
+      "email": "ethan@creative-tim.com",
+      "job": "Software Engineer",
+      "org": "Engineering",
       "online": true,
-      "date": "02/07/23"
+      "date": "05/25/22"
+    },
+    {
+      "id": "13",
+      "img": "https://randomuser.me/api/portraits/women/12.jpg",
+      "name": "Sophia Walker",
+      "email": "sophia@creative-tim.com",
+      "job": "Graphic Designer",
+      "org": "Design",
+      "online": false,
+      "date": "04/30/22"
     }
   ]
 }

@@ -1,3 +1,4 @@
+// src/utils/api.js
 import axios from 'axios';
 
 const api = axios.create({
@@ -10,7 +11,7 @@ export const getMembers = async () => {
         return response.data;
     } catch (error) {
         console.error("Error fetching members:", error);
-        throw error; // Melempar error agar bisa ditangani di tempat lain
+        throw error;
     }
 };
 
@@ -20,7 +21,7 @@ export const createMember = async (memberData) => {
         return response.data;
     } catch (error) {
         console.error("Error creating member:", error);
-        throw error; // Melempar error agar bisa ditangani di tempat lain
+        throw error;
     }
 };
 
@@ -30,6 +31,30 @@ export const deleteMember = async (memberId) => {
         return response.data;
     } catch (error) {
         console.error("Error deleting member:", error);
+        throw error;
+    }
+};
+
+export const updateMember = async (memberId, memberData) => {
+    try {
+        const response = await api.put(`/members/${memberId}`, memberData);
+        return response.data;
+    } catch (error) {
+        console.error("Error updating member:", error);
+        throw error;
+    }
+};
+
+export const uploadImage = async (formData) => {
+    try {
+        const response = await axios.post('http://localhost:5000/upload', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error uploading image:', error);
         throw error;
     }
 };
